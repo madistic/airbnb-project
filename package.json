@@ -1,6 +1,6 @@
 {
   "engines": {
-    "node":"v24.5.0"
+    "node": "v24.5.0"
   },
   "name": "airbnb",
   "version": "1.0.0",
