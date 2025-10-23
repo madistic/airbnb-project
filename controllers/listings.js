@@ -23,27 +23,32 @@ module.exports.showListing = async (req,res) => {
 };
 
 module.exports.createListing = async (req, res) => {
-   let response = await geocodingClient.forwardGeocode({
-  query: req.body.listing.location,
-  limit: 1
-})
-  .send();
+  try {
+    let response = await geocodingClient.forwardGeocode({
+      query: req.body.listing.location,
+      limit: 1
+    }).send();
 
-  const newListing = new Listing(req.body.listing);
-  newListing.owner = req.user._id;
+    const newListing = new Listing(req.body.listing);
+    newListing.owner = req.user._id;
 
-  if (req.file) {
-    newListing.image = {
-      url: req.file.path,
-      filename: req.file.filename
-    };
+    if (req.file) {
+      newListing.image = {
+        url: req.file.path,
+        filename: req.file.filename
+      };
+    }
+
+    newListing.geometry = response.body.features[0].geometry;
+    let savedListing = await newListing.save();
+    console.log(savedListing);
+    req.flash("success", "Listing created successfully!");
+    res.redirect("/listings");
+  } catch (error) {
+    console.error("Error creating listing:", error);
+    req.flash("error", "Failed to create listing. Please check if all environment variables are configured properly.");
+    res.redirect("/listings/new");
   }
-
-  newListing.geometry = response.body.features[0].geometry;
-  let savedListing = await newListing.save();
-  console.log(savedListing);
-  req.flash("success", "Listing created successfully!");
-  res.redirect("/listings");
 };
 
 

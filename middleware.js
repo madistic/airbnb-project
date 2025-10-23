@@ -30,7 +30,15 @@ let {id} = req.params;
 };   
 
 module.exports.validateListing = (req, res, next) => {
-     let {error} = listingSchema.validate(req.body);
+    const validationData = {...req.body};
+    if (!validationData.listing) {
+        validationData.listing = {};
+    }
+    if (!validationData.listing.image && req.file) {
+        validationData.listing.image = { url: "" };
+    }
+
+    let {error} = listingSchema.validate(validationData);
     if (error) {
         let msg = error.details.map(el => el.message).join(",");
         throw new ExpressError(400, msg);
